@@ -1,32 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <h1>Todos</h1>
-    <ul>
-    <% todos.forEach( el => { %>
-            <li class='todoItem' data-id='<%=el._id%>'>
-                <span class='<%= el.completed === true ? 'completed' : 'not'%>'><%= el.todo %></span>
-                <span class='del'> Delete </span>
-            </li>
-    <% }) %>    
-    </ul>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
 
-    <h2><%= user.userName %> has <%= left %> things left to do.</h2>
+        <main class="app">
 
-    <form action="/todos/createTodo" method='POST'>
-        <input type="text" placeholder="Enter Todo Item" name='todoItem'>
-        <input type="submit">
-    </form>
+            <header>
+                <h1>Todos</h1>
+            </header>
 
-    <a href="/logout">Logout</a>
+            <section class="todoList">
+                <ul>
+                <% todos.forEach( el => { %>
+                        <li class="todoItem <%= el.completed === true ? 'completed' : 'not' %>" data-id="<%= el._id %>">
+                            <span class="todoText"><%= el.todo %></span>
+                            <section class="todoMeta">
+                                <% if (el.deadline) { %>
+                                    <%
+                                        const today = new Date()
+                                        const todayUTC = Date.UTC(
+                                            today.getFullYear(),
+                                            today.getMonth(),
+                                            today.getDate()
+                                        )
+                                        const deadlineUTC = Date.UTC(
+                                            el.deadline.getUTCFullYear(),
+                                            el.deadline.getUTCMonth(),
+                                            el.deadline.getUTCDate()
+                                        )
+                                        const daysDifference = Math.floor(
+                                            (todayUTC - deadlineUTC) / 1000 / 60 / 60 / 24
+                                        )
+                                    %>
 
-    <script src="js/main.js"></script>
-</body>
+                                    <% if (daysDifference > 0 && !el.completed) { %>
+                                        <span class="deadline overdue">
+                                            DUE <%= daysDifference %> DAYS AGO
+                                        </span>
+                                    <% } else if (daysDifference === 0 && !el.completed) { %>
+                                        <span class="deadline dueToday">
+                                            DUE TODAY
+                                        </span>
+                                    <% } else { %>
+                                        <span class="deadline">
+                                            <%= el.deadline.toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                timeZone: 'UTC'
+                                            }) %>
+                                        </span>
+                                    <% } %>
+                                <% } %>
+                                <button class="del" type="button" aria-label="Delete todo" title="Delete todo">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </section>
+                        </li>
+                <% }) %>    
+                </ul>
+
+                <h2><%= user.userName %> has <span><%= left %></span> things left to do.</h2>
+            </section>
+
+            <section class="todoForm">
+                <form action="/todos/createTodo" method='POST'>
+                    <input type="text" placeholder="Enter Todo Item" name='todoItem'>
+                    <label for="todoDeadline"> Deadline <span>(optional):</span></label>
+                    <input
+                        type="date"
+                        id="todoDeadline"
+                        name="todoDeadline"
+                    >
+                    <input type="submit">
+                </form>
+            </section>
+
+            <footer>
+                <a href="/logout">Logout</a>
+            </footer>
+
+        </main>
+
+        <script src="js/main.js"></script>
+    </body>
 </html>

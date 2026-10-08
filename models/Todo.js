@@ -12,6 +12,10 @@ const TodoSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true
+  },
+  deadline: {
+    type: Date,
+    required: false
   }
 })
 
